@@ -299,6 +299,8 @@ status_t AudioRecord::start(AudioSystem::sync_event_t event, int triggerSession)
 {
     ALOGV("start, sync event %d trigger session %d", event, triggerSession);
 
+    SEEMPLOG_RECORD(71,"");
+
     AutoMutex lock(mLock);
     if (mActive) {
         return NO_ERROR;
