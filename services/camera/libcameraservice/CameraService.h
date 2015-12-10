@@ -163,8 +163,7 @@ public:
 
     enum sound_kind {
         SOUND_SHUTTER = 0,
-        SOUND_RECORDING_START = 1,
-        SOUND_RECORDING_STOP = 2,
+        SOUND_RECORDING = 1,
         NUM_SOUNDS
     };
 

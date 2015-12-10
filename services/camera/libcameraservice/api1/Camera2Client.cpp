@@ -1040,7 +1040,7 @@ status_t Camera2Client::startRecordingL(Parameters &params, bool restart) {
     }
 
     if (!restart) {
-        mCameraService->playSound(CameraService::SOUND_RECORDING_START);
+        mCameraService->playSound(CameraService::SOUND_RECORDING);
         mStreamingProcessor->updateRecordingRequest(params);
         if (res != OK) {
             ALOGE("%s: Camera %d: Unable to update recording request: %s (%d)",
@@ -1212,7 +1212,7 @@ void Camera2Client::stopRecording() {
             return;
     };
 
-    mCameraService->playSound(CameraService::SOUND_RECORDING_STOP);
+    mCameraService->playSound(CameraService::SOUND_RECORDING);
 
     // Remove recording stream to prevent it from slowing down takePicture later
     if (!l.mParameters.recordingHint && l.mParameters.isJpegSizeOverridden()) {
@@ -1638,7 +1638,7 @@ status_t Camera2Client::commandEnableShutterSoundL(bool enable) {
 }
 
 status_t Camera2Client::commandPlayRecordingSoundL() {
-    mCameraService->playSound(CameraService::SOUND_RECORDING_START);
+    mCameraService->playSound(CameraService::SOUND_RECORDING);
     return OK;
 }
 
