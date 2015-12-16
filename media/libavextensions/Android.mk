@@ -15,6 +15,9 @@ LOCAL_C_INCLUDES:= \
         $(TOP)/$(call project-path-for,qcom-media)/mm-core/inc \
         $(TOP)/frameworks/av/media/libstagefright \
 
+LOCAL_SHARED_LIBRARIES := \
+		libaudioutils
+		
 LOCAL_CFLAGS += -Wno-multichar -Werror
 
 LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/mm-audio
@@ -50,6 +53,9 @@ LOCAL_C_INCLUDES:= \
         $(TOP)/system/media/audio_utils/include \
         $(TOP)/$(call project-path-for,qcom-media)/mm-core/inc
 
+LOCAL_SHARED_LIBRARIES := \
+		libaudioutils
+		
 LOCAL_CFLAGS += -Wno-multichar -Werror
 
 ifeq ($(TARGET_ENABLE_QC_AV_ENHANCEMENTS),true)
@@ -85,6 +91,9 @@ LOCAL_C_INCLUDES:= \
         $(TOP)/system/media/audio_utils/include \
         $(TOP)/$(call project-path-for,qcom-media)/mm-core/inc
 
+LOCAL_SHARED_LIBRARIES := \
+		libaudioutils
+		
 LOCAL_CFLAGS += -Wno-multichar -Werror
 
 ifeq ($(TARGET_ENABLE_QC_AV_ENHANCEMENTS),true)
