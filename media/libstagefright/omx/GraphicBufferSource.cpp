@@ -398,16 +398,10 @@ void GraphicBufferSource::codecBufferEmptied(OMX_BUFFERHEADERTYPE* header, int f
     if (mBufferSlot[id] != NULL &&
         mBufferSlot[id]->handle == codecBuffer.mGraphicBuffer->handle) {
         mBufferUseCount[id]--;
-
-        ALOGV("codecBufferEmptied: slot=%d, cbi=%d, useCount=%d, handle=%p",
-                id, cbi, mBufferUseCount[id], mBufferSlot[id]->handle);
-
-        if (mBufferUseCount[id] < 0) {
-            ALOGW("mBufferUseCount for bq slot %d < 0 (=%d)", id, mBufferUseCount[id]);
-            mBufferUseCount[id] = 0;
-        }
-        if (id != mLatestBufferId && mBufferUseCount[id] == 0) {
+        if (mBufferUseCount[id] == 0) {
             releaseBuffer(id, codecBuffer.mFrameNumber, mBufferSlot[id], fence);
+        } else if (mBufferUseCount[id] < 0) {
+            ALOGW("mBufferUseCount for bq slot %d < 0 (=%d)", id, mBufferUseCount[id]);
         }
     } else {
         ALOGV("codecBufferEmptied: no match for emptied buffer in cbi %d",
@@ -739,10 +733,6 @@ void GraphicBufferSource::setLatestBuffer_l(
     if (!dropped) {
         ++mBufferUseCount[item.mSlot];
     }
-
-    ALOGV("setLatestBuffer_l: slot=%d, useCount=%d",
-            item.mSlot, mBufferUseCount[item.mSlot]);
-
     mRepeatBufferDeferred = false;
     mRepeatLastFrameCount = kRepeatLastFrameCount;
     mLatestBufferFence = item.mFence;
