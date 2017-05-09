@@ -19,6 +19,7 @@
 #include <inttypes.h>
 #include <utils/Log.h>
 
+#include <cutils/properties.h>
 #include <inttypes.h>
 #include "WebmWriter.h"
 #include "StagefrightRecorder.h"
@@ -1464,7 +1465,7 @@ status_t StagefrightRecorder::setupCameraSource(
     Size videoSize;
     videoSize.width = mVideoWidth;
     videoSize.height = mVideoHeight;
-    if (mCaptureFpsEnable) {
+    if (mCaptureFpsEnable && mCaptureFps != mFrameRate ) {
         if (mTimeBetweenCaptureUs < 0) {
             ALOGE("Invalid mTimeBetweenTimeLapseFrameCaptureUs value: %" PRId64 "",
                 mTimeBetweenCaptureUs);
@@ -1477,10 +1478,11 @@ status_t StagefrightRecorder::setupCameraSource(
                 mTimeBetweenCaptureUs);
         *cameraSource = mCameraSourceTimeLapse;
     } else {
-        *cameraSource = AVFactory::get()->CreateCameraSourceFromCamera(
+        mCameraSource = AVFactory::get()->CreateCameraSourceFromCamera(
                 mCamera, mCameraProxy, mCameraId, mClientName, mClientUid, mClientPid,
                 videoSize, mFrameRate,
                 mPreviewSurface);
+        *cameraSource = mCameraSource;
     }
     AVUtils::get()->cacheCaptureBuffers(mCamera, mVideoEncoder);
     mCamera.clear();
@@ -1854,9 +1856,15 @@ status_t StagefrightRecorder::resume() {
         if (mPauseStartTimeUs < bufferStartTimeUs) {
             mPauseStartTimeUs = bufferStartTimeUs;
         }
-        // 30 ms buffer to avoid timestamp overlap
-        mTotalPausedDurationUs += (systemTime() / 1000) - mPauseStartTimeUs - 30000;
+        mTotalPausedDurationUs += (systemTime() / 1000) - mPauseStartTimeUs;
+
+        bool isQCHwAACEnc = property_get_bool("qcom.hw.aac.encoder", true);
+        if (!isQCHwAACEnc || mAudioEncoder != AUDIO_ENCODER_AAC) {
+            // 30 ms buffer to avoid timestamp overlap
+            mTotalPausedDurationUs -= (30000*(mCaptureFpsEnable ? (mCaptureFps / mFrameRate) : 1));
+        }
     }
+
     double timeOffset = -mTotalPausedDurationUs;
     if (mCaptureFpsEnable) {
         timeOffset *= mCaptureFps / mFrameRate;
@@ -1880,6 +1888,13 @@ status_t StagefrightRecorder::stop() {
     if (mCaptureFpsEnable && mCameraSourceTimeLapse != NULL) {
         mCameraSourceTimeLapse->startQuickReadReturns();
         mCameraSourceTimeLapse = NULL;
+    }
+
+    if (mVideoEncoderSource != NULL) {
+        mVideoEncoderSource->notifyPerformanceMode();
+    }
+    if (mCameraSource != NULL) {
+        mCameraSource->notifyPerformanceMode();
     }
 
     if (mWriter != NULL) {
@@ -1960,6 +1975,7 @@ status_t StagefrightRecorder::reset() {
     mCaptureFps = 0.0f;
     mTimeBetweenCaptureUs = -1;
     mCameraSourceTimeLapse = NULL;
+    mCameraSource = NULL;
     mMetaDataStoredInVideoBuffers = kMetadataBufferTypeInvalid;
     mEncoderProfiles = MediaProfiles::getInstance();
     mRotationDegrees = 0;

@@ -356,7 +356,7 @@ uint32_t AudioPolicyManager::updateCallRouting(audio_devices_t rxDevice, uint32_
     DeviceVector deviceList;
     uint32_t muteWaitMs = 0;
 
-    if(!hasPrimaryOutput()) {
+    if(!hasPrimaryOutput() || mPrimaryOutput->device() == AUDIO_DEVICE_OUT_STUB) {
         return muteWaitMs;
     }
     audio_devices_t txDevice = getDeviceAndMixForInputSource(AUDIO_SOURCE_VOICE_COMMUNICATION);
@@ -1882,7 +1882,7 @@ void AudioPolicyManager::releaseInput(audio_io_handle_t input,
     ALOG_ASSERT(inputDesc != 0);
 
     sp<AudioSession> audioSession = inputDesc->getAudioSession(session);
-    if (index < 0) {
+    if (audioSession == 0) {
         ALOGW("releaseInput() unknown session %d on input %d", session, input);
         return;
     }
@@ -3192,7 +3192,8 @@ status_t AudioPolicyManager::setMasterMono(bool mono)
         Vector<audio_io_handle_t> offloaded;
         for (size_t i = 0; i < mOutputs.size(); ++i) {
             sp<SwAudioOutputDescriptor> desc = mOutputs.valueAt(i);
-            if (desc->mFlags & AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD) {
+            if (desc->mFlags & AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD ||
+                    desc->mFlags & AUDIO_OUTPUT_FLAG_DIRECT_PCM) {
                 offloaded.push(desc->mIoHandle);
             }
         }
