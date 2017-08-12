@@ -141,6 +141,7 @@ enum {
 
     kKeyIsUnreadable      = 'unre',  // bool (int32_t)
 
+#ifndef MM_DASH_IMPORTED
     kKeyRawCodecSpecificData = 'rcsd',  // raw data - added to support mmParser
     kKeyDivXVersion       = 'DivX',  // int32_t
     kKeyDivXDrm           = 'QDrm',  // void *
@@ -152,6 +153,7 @@ enum {
     kKeyWMAFormatTag      = 'fmtt',  // int64_t
     kKeyWMABitspersample  = 'bsps',  // int64_t
     kKeyWMAVirPktSize     = 'vpks',  // int64_t
+#endif
     kKeyWMVProfile        = 'wmvp',  // int32_t
 
     kKeyWMVVersion        = 'wmvv',  // int32_t
@@ -239,6 +241,7 @@ enum {
     kTypeD263        = 'd263',
 };
 
+#ifndef MM_DASH_IMPORTED
 enum {
     kTypeDivXVer_3_11,
     kTypeDivXVer_4,
@@ -251,6 +254,7 @@ enum {
     kTypeWMAPro,
     kTypeWMALossLess,
 };
+#endif
 
 enum {
     kTypeWMVVer_7, // WMV1
